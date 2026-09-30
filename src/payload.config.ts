@@ -1,5 +1,6 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -26,7 +27,21 @@ export default buildConfig({
     },
     db: mongooseAdapter({
         url: process.env.DATABASE_URL || '',
+        connectOptions: {
+            dbName: process.env.DB_NAME || undefined,
+        },
     }),
     sharp,
-    plugins: [],
+    plugins: [
+        vercelBlobStorage({
+            enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+            collections: {
+                media: {
+                    prefix: process.env.DB_NAME || 'payload-media',
+                },
+            },
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+            clientUploads: true,
+        }),
+    ],
 })
