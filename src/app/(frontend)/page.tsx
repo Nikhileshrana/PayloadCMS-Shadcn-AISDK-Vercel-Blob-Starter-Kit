@@ -1,20 +1,13 @@
 import { headers as getHeaders } from 'next/headers.js'
 import Image from 'next/image'
 import { getPayload } from 'payload'
-import React from 'react'
+import { Suspense } from 'react'
 import { fileURLToPath } from 'url'
 
 import config from '@/payload.config'
-import './styles.css'
+import './globals.css'
 
-export default async function HomePage() {
-  const headers = await getHeaders()
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
-
-  const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
-
+export default function HomePage() {
   return (
     <div className="home">
       <div className="content">
@@ -27,12 +20,13 @@ export default async function HomePage() {
             width={65}
           />
         </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
+        <Suspense fallback={<h1>Welcome to your new project.</h1>}>
+          <Greeting />
+        </Suspense>
         <div className="links">
           <a
             className="admin"
-            href={payloadConfig.routes.admin}
+            href="/admin"
             rel="noopener noreferrer"
             target="_blank"
           >
@@ -50,10 +44,23 @@ export default async function HomePage() {
       </div>
       <div className="footer">
         <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
+        <a className="codeLink" href="vscode://file/src/app/(frontend)/page.tsx">
           <code>app/(frontend)/page.tsx</code>
         </a>
       </div>
     </div>
   )
+}
+
+async function Greeting() {
+  const headers = await getHeaders()
+  const payloadConfig = await config
+  const payload = await getPayload({ config: payloadConfig })
+  const { user } = await payload.auth({ headers })
+
+  if (!user) {
+    return <h1>Welcome to your new project.</h1>
+  }
+
+  return <h1>Welcome back, {user.email}</h1>
 }
