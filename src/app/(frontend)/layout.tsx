@@ -1,4 +1,6 @@
 import React from 'react'
+import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import './globals.css'
 
 export const metadata = {
@@ -12,7 +14,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <TooltipProvider>
+          <main>{children}</main>
+          <Toaster />
+        </TooltipProvider>
       </body>
     </html>
   )
